@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BELL Foundation for the Less Privileged</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --forest: #1b4332; --forest-light: #2d6a4f; --forest-mid: #40916c;
+    --sage: #74c69d; --cream: #fdf8f0; --warm-white: #fff9f0;
+    --amber: #c77d0a; --amber-light: #f4a926; --amber-pale: #fef3c7;
+    --earth: #6b4226; --text-dark: #1a1a1a; --text-mid: #4a4a4a;
+    --text-muted: #7a7a7a; --border: rgba(27,67,50,0.12);
+    --shadow: 0 4px 32px rgba(27,67,50,0.10);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text-dark); font-size: 16px; line-height: 1.75; overflow-x: hidden; }
+
+  /* ── NAV ── */
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(253,248,240,0.97); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 1.5rem; height: 68px; display: flex; align-items: center; justify-content: space-between; transition: box-shadow 0.3s; gap: 1rem; }
+  nav.scrolled { box-shadow: 0 2px 20px rgba(0,0,0,0.08); }
+  .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0; }
+  .nav-logo { width: 38px; height: 38px; border-radius: 50%; background: var(--forest); display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 700; color: #fff; }
+  .nav-title { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 700; color: var(--forest); line-height: 1.2; }
+  .nav-title small { display: block; font-size: 0.6rem; font-weight: 400; font-family: 'DM Sans', sans-serif; color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase; }
+
+  .nav-search { flex: 1; max-width: 200px; position: relative; }
+  .nav-search input { width: 100%; padding: 7px 12px 7px 32px; border: 1px solid var(--border); border-radius: 8px; background: rgba(27,67,50,0.04); font-family: 'DM Sans', sans-serif; font-size: 0.82rem; color: var(--text-dark); outline: none; cursor: pointer; transition: border 0.2s, background 0.2s; }
+  .nav-search input:focus { border-color: var(--forest-mid); background: #fff; cursor: text; }
+  .nav-search .si { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); font-size: 13px; pointer-events: none; color: var(--text-muted); }
+
+  .nav-links { display: flex; gap: 0.1rem; list-style: none; align-items: center; }
+  .nav-links a { text-decoration: none; font-size: 0.78rem; font-weight: 500; color: var(--text-mid); padding: 6px 9px; border-radius: 6px; transition: color 0.2s, background 0.2s; white-space: nowrap; }
+  .nav-links a:hover { color: var(--forest); background: rgba(27,67,50,0.06); }
+  .nav-links .btn-nav { background: var(--forest); color: #fff !important; padding: 7px 14px; border-radius: 6px; }
+  .nav-links .btn-nav:hover { background: var(--forest-light) !important; }
+  .nav-links .btn-donate-nav { background: var(--amber-light); color: var(--forest) !important; padding: 7px 14px; border-radius: 6px; font-weight: 700; }
+  .nav-links .btn-donate-nav:hover { background: #e8981a !important; }
+
+  .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; }
+  .hamburger span { width: 24px; height: 2px; background: var(--forest); border-radius: 2px; display: block; }
+
+  .mobile-menu { display: none; position: fixed; top: 68px; left: 0; right: 0; background: var(--cream); border-bottom: 1px solid var(--border); padding: 1rem 1.5rem; z-index: 999; flex-direction: column; gap: 4px; max-height: calc(100vh - 68px); overflow-y: auto; }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a { text-decoration: none; font-size: 0.9rem; font-weight: 500; color: var(--text-mid); padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .mobile-menu a:last-child { border-bottom: none; }
+  .mob-search-wrap { padding: 8px 0; border-bottom: 1px solid var(--border); position: relative; }
+  .mob-search-wrap input { width: 100%; padding: 9px 12px 9px 34px; border: 1px solid var(--border); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; background: #fff; outline: none; cursor: pointer; }
+  .mob-search-wrap .si { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 14px; color: var(--text-muted); }
+
+  /* ── SEARCH OVERLAY ── */
+  #searchOverlay { display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(10,30,20,0.65); backdrop-filter: blur(4px); align-items: flex-start; justify-content: center; padding-top: 90px; }
+  #searchOverlay.open { display: flex; }
+  .search-panel { width: 100%; max-width: 640px; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,0.2); margin: 0 1rem; }
+  .search-panel-hd { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+  .search-panel-hd input { flex: 1; border: none; outline: none; font-size: 1rem; font-family: 'DM Sans', sans-serif; color: var(--text-dark); background: transparent; }
+  .search-panel-hd input::placeholder { color: var(--text-muted); }
+  .s-close { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--text-muted); padding: 4px 8px; border-radius: 6px; transition: background 0.2s; }
+  .s-close:hover { background: rgba(0,0,0,0.06); }
+  #searchResults { padding: 10px; max-height: 460px; overflow-y: auto; }
+  .sr-item { padding: 12px 14px; border-radius: 10px; cursor: pointer; transition: background 0.15s; text-decoration: none; display: block; }
+  .sr-item:hover { background: rgba(27,67,50,0.06); }
+  .sr-section { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--forest-mid); font-weight: 600; margin-bottom: 2px; }
+  .sr-title { font-size: 0.92rem; font-weight: 500; color: var(--text-dark); margin-bottom: 2px; }
+  .sr-snip { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+  .sr-snip mark { background: var(--amber-pale); color: var(--earth); border-radius: 3px; padding: 0 2px; }
+  .s-empty { text-align: center; padding: 2.5rem; color: var(--text-muted); font-size: 0.9rem; }
+
+  /* ── DONATE MODAL ── */
+  #donateModal { display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(10,30,20,0.65); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 1rem; }
+  #donateModal.open { display: flex; }
+  .donate-panel { width: 100%; max-width: 500px; background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,0.2); }
+  .donate-hd { background: var(--forest); padding: 1.75rem 2rem; display: flex; justify-content: space-between; align-items: flex-start; }
+  .donate-hd h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.7rem; color: #fff; font-weight: 600; }
+  .donate-hd p { font-size: 0.82rem; color: rgba(255,255,255,0.6); margin-top: 4px; }
+  .m-close { background: rgba(255,255,255,0.12); border: none; cursor: pointer; color: #fff; border-radius: 8px; padding: 6px 10px; font-size: 16px; transition: background 0.2s; flex-shrink: 0; }
+  .m-close:hover { background: rgba(255,255,255,0.22); }
+  .donate-body { padding: 1.5rem 1.75rem; }
+  .d-fg { margin-bottom: 1rem; }
+  .d-fg label { display: block; font-size: 0.77rem; font-weight: 500; color: var(--text-muted); margin-bottom: 5px; letter-spacing: 0.03em; }
+  .d-fg input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--text-dark); outline: none; transition: border 0.2s; }
+  .d-fg input:focus { border-color: var(--forest-mid); }
+  .d-fg input::placeholder { color: #bbb; }
+  .cause-chip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 1.25rem; }
+  .cause-chip { padding: 9px 11px; border: 1.5px solid var(--border); border-radius: 9px; font-size: 0.77rem; font-weight: 500; color: var(--text-mid); cursor: pointer; transition: all 0.15s; background: var(--cream); text-align: left; line-height: 1.4; font-family: 'DM Sans', sans-serif; }
+  .cause-chip:hover { border-color: var(--forest-mid); color: var(--forest); }
+  .cause-chip.sel { border-color: var(--forest); background: rgba(27,67,50,0.07); color: var(--forest); font-weight: 600; }
+  .btn-d-go { width: 100%; padding: 13px; background: var(--amber-light); color: var(--forest); font-weight: 700; font-size: 0.95rem; border: none; border-radius: 10px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s, transform 0.15s; margin-top: 0.25rem; }
+  .btn-d-go:hover { background: #e8981a; transform: translateY(-1px); }
+  #donate-err { display: none; font-size: 0.78rem; color: #dc2626; margin-top: 0.5rem; }
+  #donate-thanks { display: none; padding: 2rem 2rem 2.5rem; text-align: center; }
+  .thanks-ico { font-size: 3.5rem; margin-bottom: 1rem; }
+  #donate-thanks h3 { font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: var(--forest); margin-bottom: 0.5rem; }
+  #donate-thanks p { font-size: 0.88rem; color: var(--text-mid); max-width: 340px; margin: 0 auto; line-height: 1.8; }
+
+  /* ── HERO ── */
+  #hero { min-height: 100vh; background: var(--forest); display: flex; flex-direction: column; position: relative; overflow: hidden; padding-top: 68px; }
+  .hero-pattern { position: absolute; inset: 0; opacity: 0.05; background-image: radial-gradient(circle at 20% 50%, #74c69d 0%, transparent 50%), radial-gradient(circle at 80% 20%, #f4a926 0%, transparent 40%), radial-gradient(circle at 60% 80%, #40916c 0%, transparent 50%); }
+  .hero-content { flex: 1; display: flex; align-items: center; max-width: 1160px; margin: 0 auto; padding: 5rem 2rem 4rem; position: relative; z-index: 1; gap: 4rem; }
+  .hero-left { flex: 1; }
+  .hero-tag { display: inline-flex; align-items: center; gap: 8px; background: rgba(116,198,157,0.15); border: 1px solid rgba(116,198,157,0.3); color: var(--sage); font-size: 0.75rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; padding: 6px 14px; border-radius: 100px; margin-bottom: 1.5rem; }
+  .hero-tag::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--sage); }
+  .hero-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(3rem, 7vw, 5.5rem); font-weight: 600; line-height: 1.05; color: #fff; margin-bottom: 1.5rem; }
+  .hero-title em { font-style: italic; color: var(--amber-light); }
+  .hero-desc { font-size: 1.05rem; color: rgba(255,255,255,0.72); max-width: 520px; margin-bottom: 2.5rem; line-height: 1.8; }
+  .hero-cta { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .btn-primary { background: var(--amber-light); color: var(--forest); font-weight: 600; font-size: 0.9rem; padding: 14px 28px; border-radius: 8px; border: none; cursor: pointer; text-decoration: none; display: inline-block; transition: all 0.2s; }
+  .btn-primary:hover { background: #e8981a; transform: translateY(-1px); }
+  .btn-outline { background: transparent; color: #fff; font-weight: 500; font-size: 0.9rem; padding: 13px 28px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.3); cursor: pointer; text-decoration: none; display: inline-block; transition: all 0.2s; }
+  .btn-outline:hover { background: rgba(255,255,255,0.08); }
+  .hero-right { flex: 0 0 330px; display: flex; flex-direction: column; gap: 1rem; }
+  .hero-stat-card { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .hero-stat-card .lbl { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 4px; }
+  .hero-stat-card .val { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 600; color: var(--amber-light); line-height: 1.1; }
+  .hero-stat-card .dsc { font-size: 0.8rem; color: rgba(255,255,255,0.55); margin-top: 4px; }
+  .hero-footer { border-top: 1px solid rgba(255,255,255,0.1); padding: 1.5rem 2rem; display: flex; align-items: center; gap: 2rem; flex-wrap: wrap; position: relative; z-index: 1; max-width: 1160px; margin: 0 auto; width: 100%; }
+  .d-list { display: flex; flex-wrap: wrap; gap: 8px; flex: 1; }
+  .d-pill { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); font-size: 0.72rem; padding: 4px 12px; border-radius: 100px; }
+  .d-lbl { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.4); flex-shrink: 0; }
+
+  /* ── SECTIONS ── */
+  section { padding: 5rem 2rem; }
+  .container { max-width: 1160px; margin: 0 auto; }
+  .section-label { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--forest-mid); font-weight: 600; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 8px; }
+  .section-label::before { content: ''; width: 24px; height: 2px; background: var(--forest-mid); }
+  .section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 600; line-height: 1.1; color: var(--forest); margin-bottom: 1.25rem; }
+  .section-body { font-size: 1rem; color: var(--text-mid); max-width: 640px; line-height: 1.85; }
+
+  /* ── ABOUT ── */
+  #about { background: var(--warm-white); }
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; margin-top: 3rem; }
+  .about-card { background: var(--forest); border-radius: 16px; padding: 2.5rem; }
+  .about-card .card-lbl { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sage); margin-bottom: 1rem; }
+  .about-card .card-yr { font-family: 'Cormorant Garamond', serif; font-size: 4rem; font-weight: 600; color: var(--amber-light); line-height: 1; margin-bottom: 0.5rem; }
+  .about-card .card-txt { font-size: 0.9rem; line-height: 1.85; color: rgba(255,255,255,0.7); }
+  .founder-note { margin-top: 1.25rem; padding: 1.5rem; background: var(--amber-pale); border-radius: 12px; border-left: 3px solid var(--amber); }
+  .founder-note p { font-size: 0.88rem; color: var(--earth); line-height: 1.8; }
+  .about-body { font-size: 0.95rem; color: var(--text-mid); line-height: 1.9; }
+  .about-body p { margin-bottom: 1.25rem; }
+
+  /* ── VMV ── */
+  #vmv { background: var(--cream); }
+  .vmv-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-top: 3rem; }
+  .vmv-card { border: 1px solid var(--border); border-radius: 14px; padding: 2rem; background: #fff; transition: transform 0.2s, box-shadow 0.2s; }
+  .vmv-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+  .vmv-ico { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; font-size: 20px; }
+  .vmv-ico.g { background: rgba(27,67,50,0.08); } .vmv-ico.a { background: rgba(199,125,10,0.1); } .vmv-ico.e { background: rgba(107,66,38,0.08); }
+  .vmv-card h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 600; color: var(--forest); margin-bottom: 0.75rem; }
+  .vmv-card p { font-size: 0.88rem; color: var(--text-mid); line-height: 1.85; font-style: italic; }
+  .vals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem; }
+  .val-item { padding: 1rem 1.25rem; background: rgba(27,67,50,0.04); border-radius: 10px; }
+  .val-item strong { display: block; font-weight: 600; font-size: 0.85rem; color: var(--forest); margin-bottom: 3px; }
+  .val-item span { font-size: 0.8rem; color: var(--text-mid); line-height: 1.7; }
+
+  /* ── WORK ── */
+  #work { background: var(--warm-white); }
+  .work-hd { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; gap: 2rem; flex-wrap: wrap; }
+  .work-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+  .work-card { background: #fff; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
+  .work-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+  .wc-hd { padding: 1.75rem 1.75rem 0; display: flex; align-items: flex-start; gap: 1rem; }
+  .wc-ico { width: 50px; height: 50px; border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .wc-ico.g1{background:#e8f5e9} .wc-ico.g2{background:#e3f2fd} .wc-ico.g3{background:#e0f7fa} .wc-ico.g4{background:#fff3e0} .wc-ico.g5{background:#fce4ec} .wc-ico.g6{background:#f3e5f5}
+  .wc-title { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 600; color: var(--forest); }
+  .wc-body { padding: 1rem 1.75rem 1.75rem; }
+  .wc-body ul { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 0.5rem; }
+  .wc-body li { display: flex; gap: 10px; font-size: 0.83rem; color: var(--text-mid); line-height: 1.6; }
+  .wc-body li::before { content: '→'; color: var(--forest-mid); flex-shrink: 0; font-size: 0.75rem; padding-top: 2px; }
+
+  /* ── WHERE ── */
+  #where { background: var(--forest); }
+  #where .section-label { color: var(--sage); } #where .section-label::before { background: var(--sage); }
+  #where .section-title { color: #fff; } #where .section-body { color: rgba(255,255,255,0.6); }
+  .districts-wrap { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 3rem; }
+  .district-card { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 1rem 1.5rem; display: flex; align-items: center; gap: 10px; transition: background 0.2s; }
+  .district-card:hover { background: rgba(255,255,255,0.13); }
+  .district-card .dn { font-size: 0.95rem; font-weight: 500; color: #fff; }
+  .district-card .dr { font-size: 0.72rem; color: rgba(255,255,255,0.45); }
+
+  /* ── GET INVOLVED ── */
+  #involved { background: var(--cream); }
+  .inv-intro { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; margin-bottom: 3rem; }
+  .ways-box { background: rgba(27,67,50,0.05); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; }
+  .ways-box .wbl { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--forest-mid); font-weight: 600; margin-bottom: 0.75rem; }
+  .ways-box ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .ways-box li { font-size: 0.88rem; color: var(--text-mid); }
+
+  .inv-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 2rem; }
+  .tab-btn { padding: 9px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; border: 1.5px solid var(--border); background: #fff; cursor: pointer; color: var(--text-mid); transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+  .tab-btn:hover { border-color: var(--forest-mid); color: var(--forest); }
+  .tab-btn.active { background: var(--forest); color: #fff; border-color: var(--forest); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* Direct Support */
+  .ds-box { background: var(--forest); border-radius: 16px; padding: 2.5rem; display: flex; gap: 2rem; align-items: center; flex-wrap: wrap; }
+  .ds-box h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; color: #fff; margin-bottom: 0.75rem; }
+  .ds-box p { font-size: 0.9rem; color: rgba(255,255,255,0.68); line-height: 1.8; margin-bottom: 1.5rem; }
+  .ds-emails { display: flex; flex-direction: column; gap: 10px; }
+  .ds-btn { display: inline-flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; text-decoration: none; padding: 12px 18px; border-radius: 10px; font-size: 0.86rem; font-weight: 500; transition: background 0.2s; width: fit-content; }
+  .ds-btn:hover { background: rgba(255,255,255,0.18); }
+  .ds-img { flex: 0 0 160px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 2rem; text-align: center; }
+  .ds-img .big { font-size: 3.5rem; }
+  .ds-img p { font-size: 0.72rem; color: rgba(255,255,255,0.45); margin-top: 0.5rem; line-height: 1.5; }
+
+  /* Cause cards */
+  .cause-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 1.25rem; }
+  .cause-card { background: #fff; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
+  .cause-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+  .cc-bar { height: 5px; }
+  .cc-bar.green { background: var(--forest-mid); } .cc-bar.amber { background: var(--amber-light); } .cc-bar.blue { background: #3b82f6; } .cc-bar.rose { background: #e11d48; }
+  .cc-body { padding: 1.5rem; }
+  .cc-ico { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 1rem; }
+  .cc-ico.bg-g { background: rgba(27,67,50,0.08); } .cc-ico.bg-a { background: rgba(199,125,10,0.1); } .cc-ico.bg-b { background: rgba(59,130,246,0.1); } .cc-ico.bg-r { background: rgba(225,29,72,0.08); }
+  .cc-body h4 { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 600; color: var(--forest); margin-bottom: 0.5rem; line-height: 1.3; }
+  .cc-body p { font-size: 0.82rem; color: var(--text-mid); line-height: 1.7; margin-bottom: 1.25rem; }
+  .cc-act { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; text-decoration: none; transition: all 0.2s; }
+  .cc-act.forest { background: var(--forest); color: #fff; } .cc-act.forest:hover { background: var(--forest-light); }
+  .cc-act.amber { background: var(--amber-light); color: var(--forest); } .cc-act.amber:hover { background: #e8981a; }
+
+  /* ── TEAM ── */
+  #team { background: var(--warm-white); }
+  .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin-top: 1.5rem; }
+  .team-sub-title { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 600; color: var(--forest); margin: 2.5rem 0 1.25rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+  .person-card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem 1.25rem; display: flex; flex-direction: column; align-items: center; text-align: center; transition: transform 0.2s, box-shadow 0.2s; }
+  .person-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+  .avatar { width: 58px; height: 58px; border-radius: 50%; background: var(--forest); display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 600; color: #fff; margin-bottom: 1rem; }
+  .avatar.a { background: var(--amber); }
+  .p-name { font-weight: 600; font-size: 0.93rem; color: var(--text-dark); margin-bottom: 3px; }
+  .p-role { font-size: 0.76rem; color: var(--text-muted); line-height: 1.5; }
+
+  /* ── COMPLIANCE ── */
+  #compliance { background: var(--cream); }
+  .comp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap: 1.25rem; margin-top: 3rem; }
+  .comp-item { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; display: flex; gap: 1rem; }
+  .comp-ico { width: 40px; height: 40px; background: rgba(27,67,50,0.08); border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .comp-item h4 { font-weight: 600; font-size: 0.9rem; color: var(--forest); margin-bottom: 4px; }
+  .comp-item p { font-size: 0.82rem; color: var(--text-mid); line-height: 1.7; }
+
+  /* ── NEWS ── */
+  #news { background: var(--warm-white); }
+  .news-ph { margin-top: 3rem; border: 2px dashed var(--border); border-radius: 16px; padding: 4rem 2rem; text-align: center; }
+  .news-ph .ico { font-size: 3rem; margin-bottom: 1rem; }
+  .news-ph h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; color: var(--forest); margin-bottom: 0.5rem; }
+  .news-ph p { font-size: 0.88rem; color: var(--text-muted); max-width: 380px; margin: 0 auto; }
+
+  /* ── CONTACT ── */
+  #contact { background: var(--forest); }
+  #contact .section-label { color: var(--sage); } #contact .section-label::before { background: var(--sage); }
+  #contact .section-title { color: #fff; }
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-top: 3rem; }
+  .contact-info { display: flex; flex-direction: column; gap: 1.25rem; }
+  .c-item { display: flex; gap: 1rem; align-items: flex-start; }
+  .c-ico { width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .c-item h4 { font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 3px; }
+  .c-item p, .c-item a { font-size: 0.88rem; color: rgba(255,255,255,0.82); text-decoration: none; line-height: 1.6; }
+  .c-item a:hover { color: var(--amber-light); }
+  .contact-form { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 2rem; }
+  .contact-form h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; color: #fff; margin-bottom: 1.5rem; }
+  .f-g { margin-bottom: 1rem; }
+  .f-g label { display: block; font-size: 0.76rem; font-weight: 500; color: rgba(255,255,255,0.55); margin-bottom: 6px; }
+  .f-g input, .f-g textarea, .f-g select { width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; font-size: 0.9rem; font-family: 'DM Sans', sans-serif; outline: none; transition: border 0.2s; }
+  .f-g select option { color: var(--text-dark); background: #fff; }
+  .f-g input::placeholder, .f-g textarea::placeholder { color: rgba(255,255,255,0.28); }
+  .f-g input:focus, .f-g textarea:focus { border-color: var(--sage); }
+  .f-g textarea { resize: vertical; min-height: 100px; }
+  .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .btn-submit { width: 100%; padding: 12px; background: var(--amber-light); color: var(--forest); font-weight: 700; font-size: 0.9rem; border: none; border-radius: 8px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; margin-top: 0.5rem; }
+  .btn-submit:hover { background: #e8981a; transform: translateY(-1px); }
+
+  /* ── FOOTER ── */
+  footer { background: #0d2518; padding: 2rem; }
+  .footer-inner { max-width: 1160px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+  .footer-brand { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 600; color: rgba(255,255,255,0.7); }
+  .footer-links { display: flex; gap: 1.5rem; list-style: none; flex-wrap: wrap; }
+  .footer-links a { font-size: 0.78rem; color: rgba(255,255,255,0.4); text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--amber-light); }
+  .footer-copy { font-size: 0.75rem; color: rgba(255,255,255,0.28); }
+
+  /* ── ANIMATION ── */
+  .fade-in { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .fade-in.visible { opacity: 1; transform: none; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1024px) { .nav-search { max-width: 150px; } }
+  @media (max-width: 900px) {
+    .nav-links { display: none; } .nav-search { display: none; } .hamburger { display: flex; }
+    .hero-content { flex-direction: column; gap: 2.5rem; padding: 3rem 1.5rem 2rem; }
+    .hero-right { flex: none; width: 100%; display: grid; grid-template-columns: 1fr 1fr; }
+    .about-grid, .vmv-grid, .contact-grid, .inv-intro { grid-template-columns: 1fr; gap: 2rem; }
+    .footer-inner { flex-direction: column; text-align: center; }
+  }
+  @media (max-width: 600px) {
+    section { padding: 3.5rem 1.25rem; }
+    .hero-right { grid-template-columns: 1fr; }
+    .work-grid, .cause-cards, .comp-grid { grid-template-columns: 1fr; }
+    .hero-footer { flex-direction: column; gap: 1rem; }
+    .ds-box { flex-direction: column; } .ds-img { flex: none; width: 100%; }
+    .cause-chip-grid { grid-template-columns: 1fr; }
+    .f-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ SEARCH OVERLAY ═══════════════════ -->
+<div id="searchOverlay">
+  <div class="search-panel">
+    <div class="search-panel-hd">
+      <span style="font-size:16px;color:var(--text-muted)">🔍</span>
+      <input id="searchInput" type="text" placeholder="Search BELL Foundation…" autocomplete="off">
+      <button class="s-close" onclick="closeSearch()">✕</button>
+    </div>
+    <div id="searchResults"><div class="s-empty">Start typing to search…</div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════ DONATE MODAL ═══════════════════ -->
+<div id="donateModal">
+  <div class="donate-panel">
+    <div class="donate-hd">
+      <div><h2>Make a Donation</h2><p>Your gift directly supports vulnerable communities in Uganda.</p></div>
+      <button class="m-close" onclick="closeDonate()">✕</button>
+    </div>
+    <div id="dFormWrap" class="donate-body">
+      <div class="d-fg"><label>Your Full Name</label><input id="d-name" type="text" placeholder="e.g. Jane Smith"></div>
+      <div class="d-fg"><label>Email Address</label><input id="d-email" type="email" placeholder="you@example.com"></div>
+      <div class="d-fg">
+        <label>Choose a cause to support</label>
+        <div class="cause-chip-grid" id="causeChips">
+          <button class="cause-chip" onclick="selCause(this)">Famine Food Aid for the Elderly</button>
+          <button class="cause-chip" onclick="selCause(this)">Menstrual Hygiene for Girls</button>
+          <button class="cause-chip" onclick="selCause(this)">Vocational Skills – Single Mothers &amp; Youth</button>
+          <button class="cause-chip" onclick="selCause(this)">Emergency Shelter Provision</button>
+          <button class="cause-chip" onclick="selCause(this)">Education Scholarships</button>
+          <button class="cause-chip" onclick="selCause(this)">Clean Water &amp; Sanitation</button>
+          <button class="cause-chip" onclick="selCause(this)">General Support Fund</button>
+        </div>
+      </div>
+      <button class="btn-d-go" onclick="submitDonate()">Donate Now →</button>
+      <p id="donate-err">Please fill in all fields and select a cause.</p>
+    </div>
+    <div id="donate-thanks">
+      <div class="thanks-ico">💚</div>
+      <h3>Thank You!</h3>
+      <p id="thanks-msg">Your generous support helps us change lives across Uganda.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ NAVBAR ═══════════════════ -->
+<nav id="navbar">
+  <a class="nav-brand" href="#hero">
+    <div class="nav-logo">BF</div>
+    <div class="nav-title">BELL Foundation<small>for the Less Privileged</small></div>
+  </a>
+
+  <div class="nav-search">
+    <span class="si">🔍</span>
+    <input type="text" placeholder="Search…" onfocus="openSearch()" readonly>
+  </div>
+
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#work">Our Work</a></li>
+    <li><a href="#involved">Get Involved</a></li>
+    <li><a href="#team">Team</a></li>
+    <li><a href="#news">News</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="javascript:void(0)" onclick="openDonate()" class="btn-donate-nav">Donate</a></li>
+  </ul>
+
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mob-search-wrap">
+    <span class="si">🔍</span>
+    <input type="text" placeholder="Search…" onfocus="closeMobile();openSearch();" readonly>
+  </div>
+  <a href="#about" onclick="closeMobile()">About</a>
+  <a href="#vmv" onclick="closeMobile()">Vision, Mission &amp; Values</a>
+  <a href="#work" onclick="closeMobile()">Our Work</a>
+  <a href="#involved" onclick="closeMobile()">Get Involved</a>
+  <a href="#where" onclick="closeMobile()">Where We Work</a>
+  <a href="#team" onclick="closeMobile()">Team</a>
+  <a href="#compliance" onclick="closeMobile()">Compliance</a>
+  <a href="#news" onclick="closeMobile()">News</a>
+  <a href="#contact" onclick="closeMobile()">Contact</a>
+  <a href="javascript:void(0)" onclick="closeMobile();openDonate();" style="color:var(--amber);font-weight:700;">💛 Donate Now</a>
+</div>
+
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<section id="hero">
+  <div class="hero-pattern"></div>
+  <div class="hero-content">
+    <div class="hero-left">
+      <div class="hero-tag">Empowering Communities Since 1989</div>
+      <h1 class="hero-title">Building <em>resilient</em><br>communities<br>in Uganda.</h1>
+      <p class="hero-desc">BELL Foundation for the Less Privileged transforms the lives of disadvantaged young people and communities through education, health, livelihoods, and community resilience.</p>
+      <div class="hero-cta">
+        <a href="#work" class="btn-primary">Explore Our Work</a>
+        <a href="javascript:void(0)" onclick="openDonate()" class="btn-outline">Donate Today</a>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-stat-card"><div class="lbl">Established</div><div class="val">1989</div><div class="dsc">Formalized as CBO in 1991 · Registered charity 2024</div></div>
+      <div class="hero-stat-card"><div class="lbl">Active Districts</div><div class="val">9</div><div class="dsc">Central, Eastern &amp; Northern Uganda</div></div>
+      <div class="hero-stat-card"><div class="lbl">Focus Areas</div><div class="val">7</div><div class="dsc">Education · Health · Water · Food · Livelihoods &amp; more</div></div>
+    </div>
+  </div>
+  <div class="hero-footer container">
+    <span class="d-lbl">We work in:</span>
+    <div class="d-list">
+      <span class="d-pill">Kasanda</span><span class="d-pill">Mityana</span><span class="d-pill">Wakiso</span>
+      <span class="d-pill">Luwero</span><span class="d-pill">Kampala</span><span class="d-pill">Ngora</span>
+      <span class="d-pill">Moroto</span><span class="d-pill">Kotido</span><span class="d-pill">Gulu</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ ABOUT ═══════════════════ -->
+<section id="about">
+  <div class="container">
+    <div class="section-label">Our History</div>
+    <h2 class="section-title">A legacy of compassion<br>rooted in Uganda's story</h2>
+    <div class="about-grid fade-in">
+      <div>
+        <div class="about-card">
+          <div class="card-lbl">Founded</div>
+          <div class="card-yr">1989</div>
+          <p class="card-txt">Born out of the desperation witnessed during and after the Luwero Triangle war, BELL Foundation began as community help activities, formally registered as a CBO in 1991 and as a registered charity in 2024.</p>
+        </div>
+        <div class="founder-note">
+          <p><strong>Named after Sir Henry Hesketh Joudou Bell (1864–1952)</strong> — Uganda's first official Governor — the Foundation is a tribute by Christopher Paul, his grandson, to a legacy of community transformation. Sir Hesketh's innovations transformed Uganda into a self-reliant agricultural powerhouse by 1914.</p>
+        </div>
+      </div>
+      <div class="about-body">
+        <p>Starting in 1991 as grassroots community help activities, BELL Foundation for the Less Privileged has worked to deal with pain and suffering in a manner that respects those affected — with dignity, care, and time-consciousness.</p>
+        <p>The driving force was witnessing the misery of the people in the Luwero triangle. Christopher Paul, with roots in Uganda, chose to make a tangible change — carrying forward his grandfather's spirit of service and transformation.</p>
+        <p>Today, the Foundation continues to transform the lives of disadvantaged young people and communities in Central Uganda and parts of the north and Karamoja regions through community health, education, productive skilling, disaster action, and economic empowerment.</p>
+        <p>We operate on the conviction that <strong>poverty is man-made</strong> and can be addressed through positive human action — and that pain and suffering cross all borders, religions, and political divides.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ VMV ═══════════════════ -->
+<section id="vmv">
+  <div class="container">
+    <div class="section-label">Who We Are</div>
+    <h2 class="section-title">Vision, Mission &amp; Values</h2>
+    <p class="section-body">Our work is grounded in a clear set of principles that guide every decision and every programme we deliver.</p>
+    <div class="vmv-grid fade-in">
+      <div class="vmv-card">
+        <div class="vmv-ico g">🌿</div>
+        <h3>Vision</h3>
+        <p>"A society where the less privileged thrive in dignity, empowered to build sustainable lives and resilient communities."</p>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:6px;margin-top:1rem;">
+          <li style="font-size:0.8rem;color:var(--text-muted)">→ Dignity &amp; Respect</li>
+          <li style="font-size:0.8rem;color:var(--text-muted)">→ Fulfillment &amp; Purpose</li>
+          <li style="font-size:0.8rem;color:var(--text-muted)">→ Thriving Communities</li>
+          <li style="font-size:0.8rem;color:var(--text-muted)">→ Community Resilience</li>
+        </ul>
+      </div>
+      <div class="vmv-card">
+        <div class="vmv-ico a">⚡</div>
+        <h3>Mission</h3>
+        <p>"To empower marginalized communities through education, sustainable livelihoods, and environmental stewardship, enabling resilience and equity for a brighter future."</p>
+        <p style="font-style:normal;font-size:0.83rem;color:var(--text-muted);margin-top:1rem;">We believe strong communities are the foundation for children to realize their aspirations — and that poverty is manmade and can be overcome.</p>
+      </div>
+      <div class="vmv-card" style="grid-column:1/-1;">
+        <div class="vmv-ico e">🤝</div>
+        <h3>Our Values</h3>
+        <div class="vals-grid">
+          <div class="val-item"><strong>Equality</strong><span>Every child deserves a chance to thrive, regardless of background.</span></div>
+          <div class="val-item"><strong>Empowerment</strong><span>We equip young people with skills and resources to build a better life.</span></div>
+          <div class="val-item"><strong>Hope</strong><span>We believe in the limitless potential of young people to create a positive future.</span></div>
+          <div class="val-item"><strong>Resilience</strong><span>We reinforce the strength of children and communities to overcome challenges.</span></div>
+          <div class="val-item"><strong>Opportunity</strong><span>We unlock access to education, healthcare, sanitation, shelter, and economic means.</span></div>
+          <div class="val-item"><strong>Accountability</strong><span>We are transparent and answerable for every fund spent and every decision made.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ OUR WORK ═══════════════════ -->
+<section id="work">
+  <div class="container">
+    <div class="work-hd">
+      <div><div class="section-label">What We Do</div><h2 class="section-title">Our Programmes</h2></div>
+      <p class="section-body" style="max-width:360px;font-size:0.9rem;">Targeted interventions across seven key areas, reaching communities across Uganda.</p>
+    </div>
+    <div class="work-grid fade-in">
+      <div class="work-card">
+        <div class="wc-hd"><div class="wc-ico g1">📚</div><h3 class="wc-title">Education</h3></div>
+        <div class="wc-body"><ul>
+          <li>Scholarships &amp; bursaries from nursery through to university</li>
+          <li>School supplies for disadvantaged students</li>
+          <li>Teacher training in psychosocial skills</li>
+          <li>Building and renovating educational infrastructure</li>
+        </ul></div>
+      </div>
+      <div class="work-card">
+        <div class="wc-hd"><div class="wc-ico g2">🏥</div><h3 class="wc-title">Health &amp; Wellbeing</h3></div>
+        <div class="wc-body"><ul>
+          <li>Healthcare services at BELL Foundation schools</li>
+          <li>Community health outreach programmes</li>
+          <li>Eye care &amp; free sight lenses for students</li>
+          <li>Sanitation education through demonstrations</li>
+          <li>Support for girl child menstrual health</li>
+        </ul></div>
+      </div>
+      <div class="work-card">
+        <div class="wc-hd"><div class="wc-ico g3">💧</div><h3 class="wc-title">Clean Water &amp; Sanitation</h3></div>
+        <div class="wc-body"><ul>
+          <li>Clean water sources and wells in schools &amp; communities</li>
+          <li>Rainwater harvesting tanks for households</li>
+          <li>Pit latrine construction to improve sanitation</li>
+          <li>Sanitation education in schools and communities</li>
+        </ul></div>
+      </div>
+      <div class="work-card">
+        <div class="wc-hd"><div class="wc-ico g4">🌾</div><h3 class="wc-title">Food Security &amp; Emergency Aid</h3></div>
+        <div class="wc-body"><ul>
+          <li>Emergency food aid during crises and disasters</li>
+          <li>Crop, fisheries &amp; forestry farming for long-term food security</li>
+          <li>Organic, market-oriented farming education</li>
+          <li>Farming skills education in schools</li>
+        </ul></div>
+      </div>
+      <div class="work-card">
+        <div class="wc-hd"><div class="wc-ico g5">💼</div><h3 class="wc-title">Livelihoods &amp; Skills</h3></div>
+        <div class="wc-body"><ul>
+          <li>Vocational training for employment &amp; economic independence</li>
+          <li>Sustainable alternative livelihood activities</li>
+          <li>Computer &amp; digital literacy in schools</li>
+          <li>Digital skills for out-of-school young people</li>
+        </ul></div>
+      </div>
+      <div class="work-card">
+        <div class="wc-hd"><div class="wc-ico g6">🛡️</div><h3 class="wc-title">Community Disaster Resilience</h3></div>
+        <div class="wc-body"><ul>
+          <li>Emergency response: food, water, shelter &amp; medical supplies</li>
+          <li>Reconstruction &amp; rehabilitation of damaged infrastructure</li>
+          <li>Psychosocial support and counselling for survivors</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ WHERE WE WORK ═══════════════════ -->
+<section id="where">
+  <div class="container">
+    <div class="section-label">Reach</div>
+    <h2 class="section-title">Where we work</h2>
+    <p class="section-body">Active across nine districts — from Central Uganda to Eastern and Northern regions, including Karamoja.</p>
+    <div class="districts-wrap fade-in">
+      <div class="district-card"><span>📍</span><div><div class="dn">Kasanda</div><div class="dr">Central Region</div></div></div>
+      <div class="district-card"><span>📍</span><div><div class="dn">Mityana</div><div class="dr">Central Region</div></div></div>
+      <div class="district-card"><span>📍</span><div><div class="dn">Wakiso</div><div class="dr">Central Region</div></div></div>
+      <div class="district-card"><span>📍</span><div><div class="dn">Luwero</div><div class="dr">Central Region</div></div></div>
+      <div class="district-card"><span>📍</span><div><div class="dn">Kampala</div><div class="dr">Capital City</div></div></div>
+      <div class="district-card"><span>📍</span><div><div class="dn">Ngora</div><div class="dr">Eastern Region</div></div></div>
+      <div class="district-card"><span>📍</span><div><div class="dn">Moroto</div><div class="dr">Karamoja Region</div></div></div>
+      <div class="district-card"><span>📍</span><div><div class="dn">Kotido</div><div class="dr">Karamoja Region</div></div></div>
+      <div class="district-card"><span>📍</span><div><div class="dn">Gulu</div><div class="dr">Northern Region</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ GET INVOLVED ═══════════════════ -->
+<section id="involved">
+  <div class="container">
+    <div class="inv-intro fade-in">
+      <div>
+        <div class="section-label">Take Action</div>
+        <h2 class="section-title">Get Involved</h2>
+        <p class="section-body">There are many ways to support vulnerable communities in Uganda. Choose the path that works for you — every contribution makes a real difference.</p>
+      </div>
+      <div class="ways-box">
+        <div class="wbl">Ways to help</div>
+        <ul>
+          <li>💰 Direct financial sponsorship of any activity</li>
+          <li>🚀 Start a fundraiser for a cause you care about</li>
+          <li>🙋 Volunteer your skills on the ground in Uganda</li>
+          <li>🏠 Sponsor emergency shelter for vulnerable people</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="inv-tabs">
+      <button class="tab-btn active" onclick="switchTab(this,'t-direct')">💰 Direct Support</button>
+      <button class="tab-btn" onclick="switchTab(this,'t-fundraiser')">🚀 Start a Fundraiser</button>
+      <button class="tab-btn" onclick="switchTab(this,'t-volunteer')">🙋 Volunteer</button>
+      <button class="tab-btn" onclick="switchTab(this,'t-shelter')">🏠 Emergency Shelter</button>
+    </div>
+
+    <!-- Tab: Direct Support -->
+    <div class="tab-panel active" id="t-direct">
+      <div class="ds-box fade-in">
+        <div style="flex:1;">
+          <h3>Sponsor an Activity Directly</h3>
+          <p>You can directly sponsor any activity of BELL Foundation for the Less Privileged by reaching out to our Chief Executive Officer or Programs Director. We will work with you to identify the best fit for your contribution and ensure maximum impact.</p>
+          <div class="ds-emails">
+            <a href="mailto:ceo@bellfoundation.org" class="ds-btn"><span>📧</span> ceo@bellfoundation.org &nbsp;·&nbsp; Chief Executive Officer</a>
+            <a href="mailto:pd@bellfoundation.org" class="ds-btn"><span>📧</span> pd@bellfoundation.org &nbsp;·&nbsp; Programs Director</a>
+          </div>
+        </div>
+        <div class="ds-img">
+          <div class="big">🤝</div>
+          <p>Contact us directly to discuss how your support creates lasting impact</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Fundraiser -->
+    <div class="tab-panel" id="t-fundraiser">
+      <p style="font-size:0.9rem;color:var(--text-mid);margin-bottom:1.5rem;max-width:560px;">Support those in need by picking a cause you care about and raising funds. Click a cause card to get started.</p>
+      <div class="cause-cards">
+        <div class="cause-card">
+          <div class="cc-bar amber"></div>
+          <div class="cc-body">
+            <div class="cc-ico bg-a">🍚</div>
+            <h4>Famine Food Aid for the Elderly</h4>
+            <p>Provide emergency food aid to elderly community members who face severe food insecurity and have no other means of support during crises.</p>
+            <button class="cc-act amber" onclick="openDonateForCause('Famine Food Aid for the Elderly')">Start Fundraiser →</button>
+          </div>
+        </div>
+        <div class="cause-card">
+          <div class="cc-bar rose"></div>
+          <div class="cc-body">
+            <div class="cc-ico bg-r">🌸</div>
+            <h4>Menstrual Hygiene for Girls</h4>
+            <p>Help keep girls in school by providing menstrual hygiene supplies and education — addressing a key barrier to girls' education across Uganda.</p>
+            <button class="cc-act forest" onclick="openDonateForCause('Menstrual Hygiene for Girls')">Start Fundraiser →</button>
+          </div>
+        </div>
+        <div class="cause-card">
+          <div class="cc-bar green"></div>
+          <div class="cc-body">
+            <div class="cc-ico bg-g">💼</div>
+            <h4>Vocational Skills – Single Mothers &amp; Youth</h4>
+            <p>Fund vocational training that equips single mothers and young people with marketable skills for lasting economic independence and dignity.</p>
+            <button class="cc-act forest" onclick="openDonateForCause('Vocational Skills – Single Mothers & Youth')">Start Fundraiser →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Volunteer -->
+    <div class="tab-panel" id="t-volunteer">
+      <p style="font-size:0.9rem;color:var(--text-mid);margin-bottom:1.5rem;max-width:560px;">Give your time and skills to support communities on the ground in Uganda. Select a volunteer opportunity below to apply.</p>
+      <div class="cause-cards">
+        <div class="cause-card">
+          <div class="cc-bar green"></div>
+          <div class="cc-body">
+            <div class="cc-ico bg-g">🏗️</div>
+            <h4>Post-Conflict School Construction</h4>
+            <p>Volunteer in Central, Eastern, and Northern Uganda to build and rehabilitate school infrastructure in communities recovering from conflict.</p>
+            <a class="cc-act forest" href="mailto:volunteer@bellfoundation.org?subject=Volunteer Application: Post-Conflict School Construction">Apply Now →</a>
+          </div>
+        </div>
+        <div class="cause-card">
+          <div class="cc-bar amber"></div>
+          <div class="cc-body">
+            <div class="cc-ico bg-a">👩‍🏫</div>
+            <h4>Vocational Skills Training for Single Mothers</h4>
+            <p>Share your expertise as a trainer, equipping single mothers with practical vocational and livelihood skills for economic independence.</p>
+            <a class="cc-act amber" href="mailto:volunteer@bellfoundation.org?subject=Volunteer Application: Vocational Skills Trainer">Apply Now →</a>
+          </div>
+        </div>
+        <div class="cause-card">
+          <div class="cc-bar blue"></div>
+          <div class="cc-body">
+            <div class="cc-ico bg-b">💻</div>
+            <h4>Computer Skills Training in Schools</h4>
+            <p>Teach computer and digital literacy to students and youth in Central, Eastern, and Northern Uganda — bridging the digital divide one classroom at a time.</p>
+            <a class="cc-act forest" href="mailto:volunteer@bellfoundation.org?subject=Volunteer Application: Computer Skills Trainer">Apply Now →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Emergency Shelter -->
+    <div class="tab-panel" id="t-shelter">
+      <p style="font-size:0.9rem;color:var(--text-mid);margin-bottom:1.5rem;max-width:560px;">Help provide emergency shelter for the most vulnerable — extremely poor individuals, single mothers, and the elderly who lack adequate housing.</p>
+      <div class="cause-cards" style="grid-template-columns:minmax(280px,460px);">
+        <div class="cause-card">
+          <div class="cc-bar blue"></div>
+          <div class="cc-body">
+            <div class="cc-ico bg-b">🏠</div>
+            <h4>Emergency Shelter for Extremely Poor, Single Mothers &amp; the Elderly</h4>
+            <p>Sponsor the provision of emergency shelter materials and construction support for community members who are homeless or living in dangerous, inadequate conditions.</p>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="cc-act amber" onclick="openDonateForCause('Emergency Shelter Provision')">Donate for Shelter →</button>
+              <a class="cc-act forest" href="mailto:ceo@bellfoundation.org?subject=Emergency Shelter Sponsorship Inquiry">Contact Us →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════ TEAM ═══════════════════ -->
+<section id="team">
+  <div class="container">
+    <div class="section-label">Our People</div>
+    <h2 class="section-title">Board &amp; Senior Leadership</h2>
+    <p class="section-body">Our Board and Senior Staff bring diverse experience, cross-gender representation, and deep commitment to serving Uganda's most vulnerable communities.</p>
+
+    <div class="team-sub-title">Board of Directors</div>
+    <div class="team-grid fade-in">
+      <div class="person-card"><div class="avatar">CP</div><div class="p-name">Christopher Paul</div><div class="p-role">Chairperson</div></div>
+      <div class="person-card"><div class="avatar">BL</div><div class="p-name">Ben Luzindana</div><div class="p-role">Vice Chairperson</div></div>
+      <div class="person-card"><div class="avatar a">MA</div><div class="p-name">Martha Akurut</div><div class="p-role">Secretary</div></div>
+      <div class="person-card"><div class="avatar a">MN</div><div class="p-name">Monica Namiyingo</div><div class="p-role">Treasurer</div></div>
+      <div class="person-card"><div class="avatar">RK</div><div class="p-name">Richard Kiwanuka</div><div class="p-role">Member</div></div>
+    </div>
+
+    <div class="team-sub-title">Senior Staff</div>
+    <div class="team-grid fade-in">
+      <div class="person-card"><div class="avatar a">MA</div><div class="p-name">Martha Akurut</div><div class="p-role">Chief Executive Officer</div></div>
+      <div class="person-card"><div class="avatar">MM</div><div class="p-name">Maria Mbabazi Nakanjako</div><div class="p-role">Programs Director</div></div>
+      <div class="person-card"><div class="avatar" style="background:rgba(27,67,50,0.12);color:var(--text-muted)">?</div><div class="p-name" style="color:var(--text-muted)">Position Vacant</div><div class="p-role">Chief Finance Officer</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ COMPLIANCE ═══════════════════ -->
+<section id="compliance">
+  <div class="container">
+    <div class="section-label">Legal Status</div>
+    <h2 class="section-title">Compliance &amp; Registration</h2>
+    <p class="section-body">BELL Foundation for the Less Privileged is fully and legally registered in Uganda under multiple frameworks, ensuring transparency and accountability.</p>
+    <div class="comp-grid fade-in">
+      <div class="comp-item"><div class="comp-ico">🏛️</div><div><h4>Community-Based Organisation</h4><p>Registered in Uganda as a community-based and non-governmental organisation (NGO).</p></div></div>
+      <div class="comp-item"><div class="comp-ico">📋</div><div><h4>Registered Charity</h4><p>Registered by the Uganda NGO Bureau under the Ministry of Internal Affairs.</p></div></div>
+      <div class="comp-item"><div class="comp-ico">⚖️</div><div><h4>Company Limited by Guarantee</h4><p>Registered by the Uganda Registration Services Bureau (URSB) under the Ministry of Justice and Constitutional Affairs.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ NEWS ═══════════════════ -->
+<section id="news">
+  <div class="container">
+    <div class="section-label">Latest</div>
+    <h2 class="section-title">News &amp; Stories</h2>
+    <p class="section-body">Stories of success, community impact, and transformation from our programmes across Uganda.</p>
+    <div class="news-ph fade-in">
+      <div class="ico">📰</div>
+      <h3>Stories Coming Soon</h3>
+      <p>This section will feature activity updates, photographs, and success stories as our programmes unfold. Check back regularly.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ CONTACT ═══════════════════ -->
+<section id="contact">
+  <div class="container">
+    <div class="section-label">Reach Us</div>
+    <h2 class="section-title">Get in Touch</h2>
+    <div class="contact-grid fade-in">
+      <div class="contact-info">
+        <p style="color:rgba(255,255,255,0.58);font-size:0.9rem;line-height:1.8;margin-bottom:0.5rem;">We are committed to responding to every responsible request in a timely and respectful manner. We welcome enquiries from donors, partners, volunteers, and community members.</p>
+        <div class="c-item"><div class="c-ico">📧</div><div><h4>General Enquiries</h4><a href="mailto:info@bellfoundation.org">info@bellfoundation.org</a></div></div>
+        <div class="c-item"><div class="c-ico">👤</div><div><h4>Chief Executive Officer</h4><a href="mailto:ceo@bellfoundation.org">ceo@bellfoundation.org</a></div></div>
+        <div class="c-item"><div class="c-ico">📊</div><div><h4>Programs Director</h4><a href="mailto:pd@bellfoundation.org">pd@bellfoundation.org</a></div></div>
+        <div class="c-item"><div class="c-ico">💰</div><div><h4>Finance &amp; Donations</h4><a href="mailto:finance@bellfoundation.org">finance@bellfoundation.org</a></div></div>
+        <div class="c-item"><div class="c-ico">🤲</div><div><h4>Volunteering</h4><a href="mailto:volunteer@bellfoundation.org">volunteer@bellfoundation.org</a></div></div>
+        <div class="c-item"><div class="c-ico">💼</div><div><h4>Careers &amp; Tenders</h4><a href="mailto:careers@bellfoundation.org">careers@bellfoundation.org</a> &nbsp;·&nbsp; <a href="mailto:tenders@bellfoundation.org">tenders@bellfoundation.org</a></div></div>
+        <div class="c-item"><div class="c-ico">🌐</div><div><h4>Website</h4><p>www.bellfoundation.org</p></div></div>
+      </div>
+      <div class="contact-form">
+        <h3>Send us a message</h3>
+        <div class="f-row">
+          <div class="f-g"><label>First Name</label><input type="text" placeholder="e.g. John"></div>
+          <div class="f-g"><label>Last Name</label><input type="text" placeholder="e.g. Doe"></div>
+        </div>
+        <div class="f-g"><label>Email Address</label><input type="email" placeholder="you@example.com"></div>
+        <div class="f-g">
+          <label>Subject</label>
+          <select>
+            <option value="">Select a topic…</option>
+            <option>General Enquiry</option><option>Donation / Funding</option>
+            <option>Partnership Opportunity</option><option>Volunteering</option>
+            <option>Careers / Tenders</option><option>Media &amp; Press</option>
+          </select>
+        </div>
+        <div class="f-g"><label>Message</label><textarea placeholder="How can we help you?"></textarea></div>
+        <button class="btn-submit" onclick="handleContactSubmit(event)">Send Message</button>
+        <p id="form-msg" style="font-size:0.8rem;color:var(--sage);margin-top:0.75rem;display:none;text-align:center;">✓ Thank you! We'll get back to you shortly.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">BELL Foundation for the Less Privileged</div>
+    <ul class="footer-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#work">Our Work</a></li>
+      <li><a href="#involved">Get Involved</a></li>
+      <li><a href="#team">Team</a></li>
+      <li><a href="#compliance">Compliance</a></li>
+      <li><a href="#news">News</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="footer-copy">© 2024 BELL Foundation. All rights reserved. Uganda NGO Bureau Registered.</div>
+  </div>
+</footer>
+
+<script>
+/* ══════════ SEARCH DATA ══════════ */
+const SEARCH_INDEX = [
+  {s:'About',id:'about',t:'History of BELL Foundation',x:'established 1989 Luwero Triangle war Uganda Sir Hesketh Bell Christopher Paul community charity NGO CBO 1991 2024'},
+  {s:'About',id:'about',t:'Foundation Name & Legacy',x:'Sir Henry Hesketh Joudou Bell Governor Uganda 1907 cotton railway agriculture sleeping sickness Christopher Paul grandson tribute'},
+  {s:'Vision',id:'vmv',t:'Our Vision',x:'society less privileged thrive dignity empowered sustainable lives resilient communities children wellbeing fulfillment'},
+  {s:'Mission',id:'vmv',t:'Our Mission',x:'empower marginalized communities education sustainable livelihoods environmental stewardship resilience equity poverty manmade communities'},
+  {s:'Values',id:'vmv',t:'Our Values — Equality, Empowerment, Hope, Resilience, Opportunity, Accountability',x:'equality empowerment hope resilience opportunity accountability transparency donors children youth integrity'},
+  {s:'Our Work',id:'work',t:'Education',x:'scholarships bursaries nursery university school supplies teacher training psychosocial infrastructure construction renovation'},
+  {s:'Our Work',id:'work',t:'Health & Wellbeing',x:'healthcare schools outreach eye care sight lenses sanitation menstrual hygiene girl child health wellbeing'},
+  {s:'Our Work',id:'work',t:'Clean Water & Sanitation',x:'wells water sources rainwater harvesting tanks pit latrines sanitation education communities schools'},
+  {s:'Our Work',id:'work',t:'Food Security & Emergency Aid',x:'emergency food aid famine elderly crop fisheries forestry farming organic market agriculture schools'},
+  {s:'Our Work',id:'work',t:'Livelihoods & Skills Development',x:'vocational training employment economic independence computer literacy digital skills single mothers youth livelihoods'},
+  {s:'Our Work',id:'work',t:'Community Disaster Resilience',x:'emergency response food water shelter medical reconstruction rehabilitation psychosocial support counselling disaster'},
+  {s:'Where We Work',id:'where',t:'Districts — Kasanda, Mityana, Wakiso, Luwero, Kampala, Ngora, Moroto, Kotido, Gulu',x:'Kasanda Mityana Wakiso Luwero Kampala Ngora Moroto Kotido Gulu Central Eastern Northern Karamoja Uganda districts'},
+  {s:'Get Involved',id:'involved',t:'Direct Sponsorship',x:'sponsor activity directly CEO Programs Director contact email ceo@bellfoundation.org pd@bellfoundation.org support'},
+  {s:'Get Involved',id:'involved',t:'Start a Fundraiser — Famine Food Aid, Menstrual Hygiene, Vocational Skills',x:'fundraiser famine food elderly menstrual hygiene girls vocational skills single mothers youth cause raise money'},
+  {s:'Get Involved',id:'involved',t:'Volunteer Opportunities — School Construction, Skills Training, Computer Training',x:'volunteer school construction Central Eastern Northern Uganda vocational skills single mothers computer training youth'},
+  {s:'Get Involved',id:'involved',t:'Emergency Shelter Sponsorship',x:'sponsor emergency shelter extremely poor single mothers elderly homeless housing provision'},
+  {s:'Donate',id:'involved',t:'How to Donate',x:'donate name email cause fund support education water food health scholarship give contribution'},
+  {s:'Team',id:'team',t:'Board of Directors',x:'Christopher Paul Ben Luzindana Martha Akurut Monica Namiyingo Richard Kiwanuka chairperson vice secretary treasurer board directors'},
+  {s:'Team',id:'team',t:'Senior Staff — CEO, Programs Director, CFO',x:'Martha Akurut CEO chief executive Maria Mbabazi Nakanjako programs director CFO chief finance officer senior staff'},
+  {s:'Compliance',id:'compliance',t:'Legal Registration & Compliance',x:'Uganda NGO Bureau Ministry Internal Affairs community-based organisation URSB Uganda Registration Services Bureau Ministry Justice company limited guarantee registered'},
+  {s:'Contact',id:'contact',t:'Contact Information & Email Addresses',x:'info ceo finance volunteer careers tenders pd bellfoundation.org email contact us www website get in touch'},
+];
+
+/* ══════════ SEARCH ══════════ */
+function openSearch() {
+  document.getElementById('searchOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('searchInput').focus(), 60);
+}
+function closeSearch() {
+  document.getElementById('searchOverlay').classList.remove('open');
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchResults').innerHTML = '<div class="s-empty">Start typing to search…</div>';
+}
+document.getElementById('searchInput').addEventListener('input', function() {
+  const q = this.value.trim().toLowerCase();
+  const box = document.getElementById('searchResults');
+  if (!q) { box.innerHTML = '<div class="s-empty">Start typing to search…</div>'; return; }
+  const hits = SEARCH_INDEX.filter(item => item.t.toLowerCase().includes(q) || item.x.toLowerCase().includes(q));
+  if (!hits.length) { box.innerHTML = '<div class="s-empty">No results for "<strong>' + escHtml(this.value) + '</strong>"</div>'; return; }
+  box.innerHTML = hits.map(h => {
+    const snip = snippet(h.x, q);
+    return `<a class="sr-item" href="#${h.id}" onclick="closeSearch()">
+      <div class="sr-section">${h.s}</div>
+      <div class="sr-title">${hl(h.t, q)}</div>
+      ${snip ? `<div class="sr-snip">${hl(snip, q)}</div>` : ''}
+    </a>`;
+  }).join('');
+});
+function snippet(txt, q) {
+  const i = txt.toLowerCase().indexOf(q);
+  if (i < 0) return '';
+  const s = Math.max(0, i - 35), e = Math.min(txt.length, i + q.length + 55);
+  return (s > 0 ? '…' : '') + txt.slice(s, e) + (e < txt.length ? '…' : '');
+}
+function hl(str, q) {
+  return str.replace(new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi'), '<mark>$1</mark>');
+}
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+document.getElementById('searchOverlay').addEventListener('click', e => { if (e.target.id === 'searchOverlay') closeSearch(); });
+
+/* ══════════ DONATE ══════════ */
+function openDonate() { document.getElementById('donateModal').classList.add('open'); }
+function openDonateForCause(cause) {
+  openDonate();
+  document.querySelectorAll('.cause-chip').forEach(c => {
+    c.classList.toggle('sel', c.textContent.trim().replace(/\s+/g,' ') === cause.replace(/\s+/g,' '));
+  });
+}
+function closeDonate() {
+  document.getElementById('donateModal').classList.remove('open');
+  setTimeout(() => {
+    document.getElementById('dFormWrap').style.display = '';
+    document.getElementById('donate-thanks').style.display = 'none';
+    document.querySelectorAll('.cause-chip').forEach(c => c.classList.remove('sel'));
+    ['d-name','d-email'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('donate-err').style.display = 'none';
+  }, 300);
+}
+function selCause(el) {
+  document.querySelectorAll('.cause-chip').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function submitDonate() {
+  const name = document.getElementById('d-name').value.trim();
+  const email = document.getElementById('d-email').value.trim();
+  const chosen = document.querySelector('.cause-chip.sel');
+  const err = document.getElementById('donate-err');
+  if (!name || !email || !chosen) { err.style.display = 'block'; return; }
+  err.style.display = 'none';
+  document.getElementById('dFormWrap').style.display = 'none';
+  document.getElementById('thanks-msg').textContent =
+    'Thank you, ' + name + '! Your support for "' + chosen.textContent.trim().replace(/\s+/g,' ') +
+    '" will help change lives across Uganda. We will be in touch at ' + email + '.';
+  document.getElementById('donate-thanks').style.display = 'block';
+}
+document.getElementById('donateModal').addEventListener('click', e => { if (e.target.id === 'donateModal') closeDonate(); });
+
+/* ══════════ KEYBOARD SHORTCUTS ══════════ */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeSearch(); closeDonate(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); openSearch(); }
+});
+
+/* ══════════ NAV / MOBILE ══════════ */
+window.addEventListener('scroll', () => document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10));
+document.getElementById('hamburger').addEventListener('click', () => document.getElementById('mobileMenu').classList.toggle('open'));
+function closeMobile() { document.getElementById('mobileMenu').classList.remove('open'); }
+
+/* ══════════ TABS ══════════ */
+function switchTab(btn, panelId) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(panelId).classList.add('active');
+}
+
+/* ══════════ SCROLL FADE ══════════ */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+}, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+document.querySelectorAll('.fade-in').forEach(el => io.observe(el));
+
+/* ══════════ CONTACT FORM ══════════ */
+function handleContactSubmit(e) {
+  e.preventDefault();
+  const msg = document.getElementById('form-msg');
+  msg.style.display = 'block';
+  setTimeout(() => { msg.style.display = 'none'; }, 5000);
+}
+
+/* ══════════ ACTIVE NAV ══════════ */
+const allSections = document.querySelectorAll('section[id]');
+const allNavLinks = document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll', () => {
+  let cur = '';
+  allSections.forEach(s => { if (window.scrollY >= s.offsetTop - 100) cur = s.id; });
+  allNavLinks.forEach(a => { a.style.color = a.getAttribute('href') === '#' + cur ? 'var(--forest)' : ''; });
+}, { passive: true });
+</script>
+</body>
+</html>
